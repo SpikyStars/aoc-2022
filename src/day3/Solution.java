@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Solution {
     private static final boolean testMode = false;
-    private static final int puzzleNum = 1;
+    private static final int puzzleNum = 2;
 
     public static void main(String[] args) {
         String fileName = testMode ? "testInput.txt" : "input.txt";
@@ -17,7 +17,7 @@ public class Solution {
 
         switch (puzzleNum) {
             case 1 -> puzzle1(filePath);
-//            case 2 -> puzzle2(filePath);
+            case 2 -> puzzle2(filePath);
         }
     }
 
@@ -43,6 +43,37 @@ public class Solution {
                 int charPriority = priorityHelper(dupeChar);
                 prioritySum += charPriority;
                 line = br.readLine();
+            }
+            System.out.println(prioritySum);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void puzzle2(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            int prioritySum = 0;
+            Set<Character> commonChars = new HashSet<>();
+            int lineNum = 1;
+
+            String line = br.readLine();
+            while (line != null) {
+                if (commonChars.isEmpty()) {
+                    commonChars = line.chars().mapToObj(c -> (char) c).collect(Collectors.toCollection(HashSet::new));
+                } else {
+                    commonChars = line
+                            .chars()
+                            .mapToObj(c -> (char) c)
+                            .filter(commonChars::contains)
+                            .collect(Collectors.toCollection(HashSet::new));
+                }
+                if (lineNum % 3 == 0) {
+                    Character badgeChar = commonChars.stream().findFirst().orElse(null);
+                    prioritySum += priorityHelper(badgeChar);
+                    commonChars.clear();
+                }
+                line = br.readLine();
+                lineNum++;
             }
             System.out.println(prioritySum);
         } catch (IOException e) {
