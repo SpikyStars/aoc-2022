@@ -3,6 +3,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 **/input.txt
+**/*.iml
 
 ### Eclipse ###
 .apt_generated
