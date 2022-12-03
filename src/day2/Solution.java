@@ -8,16 +8,23 @@ import java.util.Map;
 
 public class Solution {
     private static final boolean testMode = false;
-    private static final int puzzleNum = 1;
+    private static final int puzzleNum = 2;
     private enum RPSType {
         ROCK,
         PAPER,
         SCISSORS
     }
 
+    private enum RPSResult {
+        WIN,
+        LOSS,
+        DRAW
+    }
+
     private record RPSInfo(int score, RPSType winsTo, RPSType losesTo) {}
 
-    private static final Map<Character, RPSType> rpsMap = initializeRPSMap();
+    private static final Map<Character, RPSType> rpsTypeMap = initializeRPSTypeMap();
+    private static final Map<Character, RPSResult> rpsResultMap = initializeRPSResultMap();
     private static final Map<RPSType, RPSInfo> rpsInfo = initializeRPSInfo();
 
 
@@ -27,7 +34,7 @@ public class Solution {
 
         switch (puzzleNum) {
             case 1 -> puzzle1(filePath);
-//            case 2 -> puzzle2(filePath);
+            case 2 -> puzzle2(filePath);
         }
     }
     private static void puzzle1(String filePath) {
@@ -36,8 +43,8 @@ public class Solution {
             int yourScore = 0;
             int opponentScore = 0;
             while (line != null) {
-                RPSType opponentType = rpsMap.get(line.charAt(0));
-                RPSType yourType = rpsMap.get(line.charAt(2));
+                RPSType opponentType = rpsTypeMap.get(line.charAt(0));
+                RPSType yourType = rpsTypeMap.get(line.charAt(2));
                 RPSInfo opponentInfo = rpsInfo.get(opponentType);
                 RPSInfo yourInfo = rpsInfo.get(yourType);
 
@@ -62,8 +69,49 @@ public class Solution {
         }
     }
 
+    private static void puzzle2(String filePath) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line = br.readLine();
+            int yourScore = 0;
+            int opponentScore = 0;
+            while (line != null) {
+                RPSType opponentType = rpsTypeMap.get(line.charAt(0));
+                RPSResult yourResult = rpsResultMap.get(line.charAt(2));
+                RPSInfo opponentInfo = rpsInfo.get(opponentType);
 
-    private static Map<Character, RPSType> initializeRPSMap() {
+                RPSType yourType;
+                switch (yourResult) {
+                    case WIN -> {
+                        yourType = opponentInfo.losesTo;
+                        yourScore += 6;
+                    }
+                    case LOSS -> {
+                        yourType = opponentInfo.winsTo;
+                        opponentScore += 6;
+                    }
+                    default -> {
+                        yourType = opponentType;
+                        opponentScore += 3;
+                        yourScore += 3;
+                    }
+                }
+
+                RPSInfo yourInfo = rpsInfo.get(yourType);
+
+                opponentScore += opponentInfo.score;
+                yourScore += yourInfo.score;
+
+                line = br.readLine();
+            }
+            System.out.println("Your score: " + yourScore);
+            System.out.println("Opponent's score: " + opponentScore);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private static Map<Character, RPSType> initializeRPSTypeMap() {
         Map<Character, RPSType> rpsMap = new HashMap<>();
         rpsMap.put('A', RPSType.ROCK);
         rpsMap.put('B', RPSType.PAPER);
@@ -71,6 +119,14 @@ public class Solution {
         rpsMap.put('X', RPSType.ROCK);
         rpsMap.put('Y', RPSType.PAPER);
         rpsMap.put('Z', RPSType.SCISSORS);
+        return rpsMap;
+    }
+
+    private static Map<Character, RPSResult> initializeRPSResultMap() {
+        Map<Character, RPSResult> rpsMap = new HashMap<>();
+        rpsMap.put('X', RPSResult.LOSS);
+        rpsMap.put('Y', RPSResult.DRAW);
+        rpsMap.put('Z', RPSResult.WIN);
         return rpsMap;
     }
 
