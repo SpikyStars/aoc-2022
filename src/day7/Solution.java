@@ -8,20 +8,17 @@ import java.util.*;
 public class Solution {
     private static final boolean testMode = false;
 
-    private static final int puzzleNum = 1;
 
     public static void main(String[] args) {
         String fileName = testMode ? "testInput.txt" : "input.txt";
         String filePath = "src/day7/" + fileName;
 
-        switch (puzzleNum) {
-            case 1 -> puzzle1(filePath);
-//            case 2 -> puzzle2(filePath);
-        }
+        puzzle(filePath);
+
     }
 
 
-    private static void puzzle1(String filePath) {
+    private static void puzzle(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line = br.readLine();
             Directory rootDirectory = new Directory("/", null);
@@ -54,21 +51,48 @@ public class Solution {
             }
             // Now iterate through data structure
             Map<String, Integer> sizesMap = new HashMap<>();
-            puzzle1Helper(sizesMap, rootDirectory);
+            puzzleHelper(sizesMap, rootDirectory);
 
             int sizeSum = 0;
+
+            // for puzzle 2 - I could just call getSize() on the root directory but then i would feel bad :(
+            // not that the way I'm going to retrieve it in a couple lines is a lot better
+            int totalSystemSum = 0;
             for (int s : sizesMap.values()) {
+                if (s > totalSystemSum) {
+                    totalSystemSum = s;
+                }
                 if (s <= 100000) {
                     sizeSum += s;
                 }
             }
+            // puzzle 1 output
             System.out.println(sizeSum);
+
+
+            // puzzle 2 stuff
+            int closestSize = 0;
+            int lowestRem = Integer.MAX_VALUE;
+            for (int s : sizesMap.values()) {
+                int remainingSize = 70000000 - totalSystemSum;
+                int sizeToDelete = 30000000 - remainingSize;
+                if (s >= sizeToDelete) {
+                    int extraDeleted = s - sizeToDelete;
+                    if (extraDeleted < lowestRem) {
+                        lowestRem = extraDeleted;
+                        closestSize = s;
+                    }
+                }
+
+            }
+            System.out.println(closestSize);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static void puzzle1Helper(Map<String, Integer> sizesMap, Directory dir) {
+    private static void puzzleHelper(Map<String, Integer> sizesMap, Directory dir) {
         // very much not foolproof but let's be lazy and try it for this input...
         // worked lol
         String uniqueName;
@@ -81,7 +105,7 @@ public class Solution {
             sizesMap.put(uniqueName, dir.getSize());
         }
         for (Directory d : dir.childDirectories.keySet()) {
-            puzzle1Helper(sizesMap, d);
+            puzzleHelper(sizesMap, d);
         }
     }
 
