@@ -26,7 +26,6 @@ public class Solution {
             String line = br.readLine();
             Directory rootDirectory = new Directory("/", null);
             Directory curDirectory = rootDirectory;
-            int debug = 0;
             while (line != null) {
                 // Create the file system data structure first
                 if (line.startsWith("$")) {
@@ -46,7 +45,6 @@ public class Solution {
                     if (line.startsWith("dir")) {
                         String directoryName = line.replace("dir ", "");
                         curDirectory.addAndGetChild(directoryName);
-                        debug++;
                     } else {
                         String[] fileInfo = line.split("\\s");
                         curDirectory.files.add(new File(Integer.parseInt(fileInfo[0]), fileInfo[1]));
@@ -59,16 +57,11 @@ public class Solution {
             puzzle1Helper(sizesMap, rootDirectory);
 
             int sizeSum = 0;
-            for (String s: sizesMap.keySet()) {
-                System.out.println(s);
-            }
             for (int s : sizesMap.values()) {
                 if (s <= 100000) {
                     sizeSum += s;
                 }
             }
-            System.out.println(debug);
-            System.out.println(sizesMap.size());
             System.out.println(sizeSum);
         } catch (IOException e) {
             e.printStackTrace();
