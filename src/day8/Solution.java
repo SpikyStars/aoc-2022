@@ -6,20 +6,17 @@ import java.io.IOException;
 import java.util.*;
 
 public class Solution {
-    private static final boolean testMode = false;
-    private static final int puzzleNum = 1;
+    private static final boolean testMode = true;
 
     public static void main(String[] args) {
         String fileName = testMode ? "testInput.txt" : "input.txt";
         String filePath = "src/day8/" + fileName;
 
-        switch (puzzleNum) {
-            case 1 -> puzzle1(filePath);
-//            case 2 -> puzzle2(filePath);
-        }
+        puzzle(filePath);
+
     }
 
-    private static void puzzle1(String filePath) {
+    private static void puzzle(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
 
             int numVisible = 0;
@@ -97,6 +94,62 @@ public class Solution {
             }
 
             System.out.println(numVisible);
+
+
+            // puzzle 2 stuff
+
+            HashMap<IntPair, Tree> coordsMap = new HashMap<>();
+
+            // create map of int pairs to trees
+
+            for (int r = 0; r < treeGrid.size(); r++) {
+                List<Integer> treeRow = treeGrid.get(r);
+                for (int c = 0; c < rowLength; c++) {
+                    IntPair coords = new IntPair(r, c);
+                    coordsMap.put(coords, new Tree(treeRow.get(c)));
+                }
+            }
+
+            // assign neighbors
+            for (int r = 0; r < treeGrid.size(); r++) {
+                for (int c = 0; c < rowLength; c++) {
+                    IntPair coords = new IntPair(r, c);
+                    // get neighbors
+                    IntPair north = null;
+                    IntPair south = null;
+                    IntPair east = null;
+                    IntPair west = null;
+
+                    if (r != 0) {
+                        north = new IntPair(r - 1, c);
+                    }
+                    if (r != treeGrid.size() - 1) {
+                        south = new IntPair(r + 1, c);
+                    }
+                    if (c != 0) {
+                        west = new IntPair(r, c - 1);
+                    }
+                    if (c != rowLength - 1) {
+                        east = new IntPair(r, c + 1);
+                    }
+
+                    Tree tree = coordsMap.get(coords);
+                    tree.setNeighbors(coordsMap.getOrDefault(north, null),
+                            coordsMap.getOrDefault(south, null),
+                            coordsMap.getOrDefault(west, null),
+                            coordsMap.getOrDefault(east, null));
+                }
+            }
+
+            int highestScore = 0;
+            for (Tree t : coordsMap.values()) {
+                int treeScore = t.getScenicScore();
+                if (highestScore < treeScore) {
+                    highestScore = treeScore;
+                }
+            }
+
+            System.out.println(highestScore);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,6 +175,73 @@ public class Solution {
         private IntPair(int first, int second) {
             this.first = first;
             this.second = second;
+        }
+    }
+
+    private static class Tree {
+        Tree north;
+        Tree south;
+        Tree west;
+        Tree east;
+
+        int height;
+
+        private Tree(int height) {
+            this.height = height;
+        }
+
+        private void setNeighbors(Tree north, Tree south, Tree west, Tree east) {
+            this.north = north;
+            this.south = south;
+            this.west = west;
+            this.east = east;
+        }
+
+        private int getScenicScore() {
+            return getViewDistanceWest(this.height)
+                    * getViewDistanceEast(this.height)
+                    * getViewDistanceNorth(this.height)
+                    * getViewDistanceSouth(this.height);
+        }
+
+        private int getViewDistanceNorth(int startingHeight) {
+            if (this.north == null) {
+                return 0;
+            } else if (this.north.height >= startingHeight) {
+                return 1;
+            } else {
+                return 1 + this.north.getViewDistanceNorth(startingHeight);
+            }
+        }
+
+        private int getViewDistanceSouth(int startingHeight) {
+            if (this.south == null) {
+                return 0;
+            } else if (this.south.height >= startingHeight) {
+                return 1;
+            } else {
+                return 1 + this.south.getViewDistanceSouth(startingHeight);
+            }
+        }
+
+        private int getViewDistanceWest(int startingHeight) {
+            if (this.west == null) {
+                return 0;
+            } else if (this.west.height >= startingHeight) {
+                return 1;
+            } else {
+                return 1 + this.west.getViewDistanceWest(startingHeight);
+            }
+        }
+
+        private int getViewDistanceEast(int startingHeight) {
+            if (this.east == null) {
+                return 0;
+            } else if (this.east.height >= startingHeight) {
+                return 1;
+            } else {
+                return 1 + this.east.getViewDistanceEast(startingHeight);
+            }
         }
     }
 
